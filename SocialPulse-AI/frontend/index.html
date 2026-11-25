@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SocialPulse AI</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- React 18 (development build — better error reporting) -->
+<script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+
+<!-- Recharts — use 2.9.3, the last version with a confirmed unpkg UMD build -->
+<script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+<script src="https://unpkg.com/recharts@2.9.3/umd/Recharts.js"></script>
+
+<!-- Babel standalone — transpile JSX in-browser -->
+<script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#e6edf3;font-family:-apple-system,"Segoe UI",system-ui,sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#161b27}
+::-webkit-scrollbar-thumb{background:#252d3d;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#10b981}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;transition:all .2s;color:#8b929e;font-size:14px;font-weight:500;border:1px solid transparent}
+.sidebar-link:hover{background:#1c2333;color:#e6edf3}
+.sidebar-link.active{background:rgba(16,185,129,.15);color:#10b981;border-color:rgba(16,185,129,.25)}
+.card{background:#1c2333;border:1px solid #252d3d;border-radius:12px;padding:20px;transition:border-color .2s}
+.card:hover{border-color:#374151}
+.kpi-card{background:linear-gradient(135deg,#1c2333 0%,#1a2540 100%);border:1px solid #252d3d;border-radius:12px;padding:20px;transition:all .2s}
+.kpi-card:hover{border-color:#10b981;transform:translateY(-1px)}
+.btn-primary{background:#10b981;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:#059669}
+.btn-primary:disabled{background:#374151;cursor:not-allowed;opacity:.6}
+.btn-secondary{background:#1c2333;color:#e6edf3;border:1px solid #252d3d;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-secondary:hover{border-color:#10b981;color:#10b981}
+.input{background:#161b27;border:1px solid #252d3d;border-radius:8px;padding:10px 14px;color:#e6edf3;font-size:14px;width:100%;outline:none;transition:border-color .2s}
+.input:focus{border-color:#10b981}
+.select{background:#161b27;border:1px solid #252d3d;border-radius:8px;padding:10px 14px;color:#e6edf3;font-size:14px;outline:none;cursor:pointer;transition:border-color .2s}
+.select:focus{border-color:#10b981}
+.textarea{background:#161b27;border:1px solid #252d3d;border-radius:8px;padding:12px 14px;color:#e6edf3;font-size:14px;width:100%;outline:none;transition:border-color .2s;resize:vertical;min-height:100px;font-family:inherit}
+.textarea:focus{border-color:#10b981}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.25)}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.25)}
+.badge-yellow{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.25)}
+.badge-blue{background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.25)}
+.badge-purple{background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.25)}
+.badge-demo{background:rgba(245,158,11,.12);color:#f59e0b;border:1px solid rgba(245,158,11,.35);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600}
+.progress-bar{background:#252d3d;border-radius:4px;height:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.trend-card{background:#1c2333;border:1px solid #252d3d;border-radius:12px;padding:18px;cursor:pointer;transition:all .2s}
+.trend-card:hover{border-color:#10b981;background:#1e2840}
+.platform-filter{padding:7px 16px;border-radius:20px;border:1px solid #252d3d;background:#1c2333;color:#8b929e;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.platform-filter.active{background:rgba(16,185,129,.15);color:#10b981;border-color:rgba(16,185,129,.35)}
+.platform-filter:hover{border-color:#374151;color:#e6edf3}
+.tab-btn{padding:9px 18px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;color:#8b929e;background:transparent}
+.tab-btn.active{background:rgba(16,185,129,.15);color:#10b981;border-color:rgba(16,185,129,.25)}
+.tab-btn:hover{color:#e6edf3;background:#1c2333}
+.cal-slot{background:#1c2333;border:1px solid #252d3d;border-radius:8px;padding:10px;min-height:80px;transition:border-color .2s}
+.cal-slot:hover{border-color:#10b981}
+.cal-post{font-size:11px;padding:4px 8px;border-radius:5px;margin-bottom:4px;cursor:pointer}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(16,185,129,.3);border-top-color:#10b981;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.copy-btn{background:transparent;border:1px solid #252d3d;border-radius:6px;color:#8b929e;padding:4px 10px;font-size:12px;cursor:pointer;transition:all .2s}
+.copy-btn:hover{border-color:#10b981;color:#10b981}
+.result-box{background:#161b27;border:1px solid #252d3d;border-radius:10px;padding:16px;white-space:pre-wrap;line-height:1.7;font-size:14px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:10px 14px;color:#8b929e;font-weight:500;border-bottom:1px solid #252d3d;white-space:nowrap}
+tbody td{padding:11px 14px;border-bottom:1px solid #1a2234;vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(16,185,129,.04)}
+.upload-zone{border:2px dashed #252d3d;border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:all .2s}
+.upload-zone:hover{border-color:#10b981;background:rgba(16,185,129,.04)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#161b27;border:1px solid #252d3d;border-radius:14px;padding:28px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto}
+.logo-text{font-size:18px;font-weight:700;background:linear-gradient(135deg,#10b981,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+</style>
+</head>
+<body>
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#8b929e;font-size:14px;">Loading SocialPulse AI...</div></div>
+
+<script>
+// Guard — if any CDN script failed to load, show a helpful message
+window.addEventListener('error', function(e) {
+  if (e.target && e.target.tagName === 'SCRIPT') {
+    console.error('Script load failed:', e.target.src);
+  }
+}, true);
+</script>
+
+<script type="text/babel" data-presets="react,env">
+// ─────────────────────────────────────────────────────────────────────────────
+// SocialPulse AI — Main Application
+// API: http://127.0.0.1:5000  (Flask serves this file, so same-origin)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const { useState, useEffect, useRef, useCallback } = React;
+
+// Recharts components
+const {
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} = Recharts;
+
+// API base — if served by Flask it's same-origin; also works from file://
+const API_BASE = "http://127.0.0.1:5000/api";
+
+// ── Inline fallback data (renders instantly, no network needed) ──────────────
+const FALLBACK = {
+  demo_mode: true,
+  kpis: {
+    total_reach:      { value: "224,900", change: "+18.4%", trend: "up" },
+    engagement_rate:  { value: "5.68%",   change: "+0.9%",  trend: "up" },
+    followers_growth: { value: "+3,842",  change: "+12.1%", trend: "up" },
+    sentiment_score:  { value: "84/100",  change: "+6pts",  trend: "up" },
+  },
+  weekly_engagement: [
+    {day:"Mon",instagram:4200,youtube:8100,linkedin:1800,facebook:3100,twitter:2900},
+    {day:"Tue",instagram:5100,youtube:7600,linkedin:2200,facebook:2800,twitter:3400},
+    {day:"Wed",instagram:4800,youtube:9200,linkedin:2600,facebook:3300,twitter:4100},
+    {day:"Thu",instagram:6300,youtube:8800,linkedin:3100,facebook:3700,twitter:3800},
+    {day:"Fri",instagram:7200,youtube:11200,linkedin:2900,facebook:4100,twitter:5200},
+    {day:"Sat",instagram:8900,youtube:14100,linkedin:1900,facebook:5200,twitter:6100},
+    {day:"Sun",instagram:7600,youtube:12300,linkedin:1500,facebook:4800,twitter:5500},
+  ],
+  platform_performance: [
+    {platform:"Instagram",reach:48200,engagement:6.8,followers:24300,posts:14},
+    {platform:"YouTube",  reach:92400,engagement:4.2,followers:51200,posts:6},
+    {platform:"LinkedIn", reach:18700,engagement:5.1,followers:9800, posts:10},
+    {platform:"Facebook", reach:31500,engagement:3.4,followers:18400,posts:12},
+    {platform:"X",        reach:29100,engagement:2.9,followers:15700,posts:28},
+  ],
+  recent_posts: [
+    {post:"10 AI tools that will replace your team",      platform:"LinkedIn", reach:12400,likes:847, comments:213,shares:391,sentiment:"Positive"},
+    {post:"POV: You discovered the morning routine",       platform:"Instagram",reach:8900, likes:1203,comments:89, shares:42, sentiment:"Positive"},
+    {post:"Why your startup will fail (and how to fix it)",platform:"YouTube",  reach:34200,likes:2814,comments:476,shares:821,sentiment:"Mixed"},
+    {post:"Thread: The brutal truth about passive income", platform:"X",        reach:7200, likes:492, comments:128,shares:267,sentiment:"Neutral"},
+    {post:"Behind the scenes: 6-figure newsletter",        platform:"Facebook", reach:5600, likes:318, comments:54, shares:89, sentiment:"Positive"},
+  ],
+  trending_hashtags: [
+    {tag:"#AITools",        volume:2400000,growth:"+142%",relevance:97},
+    {tag:"#CreatorEconomy", volume:890000, growth:"+89%", relevance:91},
+    {tag:"#PassiveIncome",  volume:1200000,growth:"+67%", relevance:84},
+    {tag:"#StartupLife",    volume:760000, growth:"+55%", relevance:78},
+    {tag:"#ContentStrategy",volume:420000, growth:"+48%", relevance:88},
+    {tag:"#LinkedInGrowth", volume:310000, growth:"+41%", relevance:82},
+    {tag:"#DigitalNomad",   volume:980000, growth:"+37%", relevance:73},
+    {tag:"#SideHustle",     volume:1500000,growth:"+29%", relevance:76},
+  ],
+  sentiment_distribution: {positive:61, neutral:24, negative:15},
+};
+
+const FALLBACK_TRENDS = [
+  {name:"AI-Generated Short-Form Video", hashtags:["#AIVideo","#ShortForm","#Reels"],       momentum:94,niche:"Tech / Creator",    growth:"+218%",angle:"Show AI tools creating content in real-time"},
+  {name:"Authenticity Over Perfection",  hashtags:["#RealTalk","#Authentic","#BehindScenes"],momentum:87,niche:"Lifestyle / Brand",  growth:"+156%",angle:"Raw, unfiltered behind-the-scenes content"},
+  {name:"AI Productivity Stacks",        hashtags:["#AITools","#Productivity","#WorkSmart"],  momentum:91,niche:"Business / SaaS",   growth:"+189%",angle:"Compare tools in a 60-second speed test"},
+  {name:"Creator Business Transparency", hashtags:["#IncomeReport","#Transparency"],          momentum:78,niche:"Creator / Finance",  growth:"+134%",angle:"Monthly revenue breakdown with real numbers"},
+  {name:"Silent Walking Challenges",     hashtags:["#SilentWalk","#Mindfulness"],             momentum:72,niche:"Health / Wellness",  growth:"+98%", angle:"Personal reflection and mental clarity"},
+  {name:"B2B LinkedIn Storytelling",     hashtags:["#LinkedInStory","#B2BMarketing"],         momentum:83,niche:"B2B / Professional", growth:"+145%",angle:"Turn client wins into narrative-style posts"},
+  {name:"Micro-SaaS Launch Stories",     hashtags:["#MicroSaaS","#Buildinpublic"],            momentum:86,niche:"Tech / Startup",     growth:"+167%",angle:"Document launch day with metrics"},
+  {name:"Personal Finance Reframes",     hashtags:["#MoneyMindset","#FinanceTips"],           momentum:79,niche:"Finance / Self-help", growth:"+112%",angle:"Counter-intuitive money advice with data"},
+];
+
+const FALLBACK_COMPETITORS = [
+  {name:"GrowthHQ",      niche:"Creator Tools",    followers:128000,eng_rate:7.2,top_formats:["Carousels","Short Video","Threads"], growth:"+34%",platform:"Instagram"},
+  {name:"ContentOS",     niche:"Content Strategy", followers:94500, eng_rate:5.8,top_formats:["Long-form","Newsletters","LinkedIn"],growth:"+28%",platform:"LinkedIn"},
+  {name:"ViralVault",    niche:"Viral Content",    followers:215000,eng_rate:9.1,top_formats:["Memes","Reels","TikTok Duets"],      growth:"+61%",platform:"TikTok"},
+  {name:"BrandAI Studio",niche:"AI for Brands",    followers:67200, eng_rate:6.4,top_formats:["AI Demos","Case Studies","Webinars"],growth:"+47%",platform:"YouTube"},
+  {name:"PulseCreative", niche:"Social Analytics", followers:41800, eng_rate:4.9,top_formats:["Data Stories","Reports","Twitter"],  growth:"+19%",platform:"X"},
+];
+
+// ── API Helper ────────────────────────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API_BASE + path, {
+    headers: { "Content-Type": "application/json" },
+    ...opts,
+  });
+  if (!res.ok) {
+    // Try to extract JSON error message from body
+    try {
+      const j = await res.json();
+      throw new Error(j.error || ("API " + res.status));
+    } catch(e) {
+      if (e.message && !e.message.startsWith("API ")) throw e;
+      throw new Error("API " + res.status);
+    }
+  }
+  return res.json();
+}
+
+// ── Shared UI Components ──────────────────────────────────────────────────────
+function Spinner() {
+  return React.createElement("div", { className: "spinner" });
+}
+
+function DemoTag() {
+  return React.createElement("span", { className: "badge-demo" }, "\u26A1 Demo AI Mode");
+}
+
+function CopyBtn({ text }) {
+  const [copied, setCopied] = useState(false);
+  const doCopy = () => {
+    if (!text) return;
+    try {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+        setCopied(true); setTimeout(() => setCopied(false), 2000);
+      });
+    } catch(e) {}
+  };
+  return <button className="copy-btn" onClick={doCopy}>{copied ? "✓ Copied" : "⎘ Copy"}</button>;
+}
+
+function PlatformBadge({ p }) {
+  const c = {Instagram:"badge-purple",YouTube:"badge-red",LinkedIn:"badge-blue",
+              Facebook:"badge-blue",X:"badge-yellow","X (Twitter)":"badge-yellow",TikTok:"badge-green"};
+  return <span className={`badge ${c[p] || "badge-blue"}`}>{p}</span>;
+}
+
+function ChartTip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div style={{background:"#1c2333",border:"1px solid #252d3d",borderRadius:8,padding:"10px 14px",fontSize:12}}>
+      <p style={{color:"#8b929e",marginBottom:4}}>{label}</p>
+      {payload.map((p, i) => <p key={i} style={{color:p.color}}>{p.name}: {typeof p.value === "number" ? p.value.toLocaleString() : p.value}</p>)}
+    </div>
+  );
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function Dashboard() {
+  const [data, setData] = useState(FALLBACK);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiFetch("/dashboard")
+      .then(d => { setData(d); setLoading(false); })
+      .catch(() => { setLoading(false); /* keep FALLBACK */ });
+  }, []);
+
+  const kpis = [
+    { label:"Total Reach",      icon:"🌐", key:"total_reach",      color:"#10b981" },
+    { label:"Engagement Rate",  icon:"❤️", key:"engagement_rate",  color:"#3b82f6" },
+    { label:"Followers Growth", icon:"👥", key:"followers_growth", color:"#8b5cf6" },
+    { label:"Sentiment Score",  icon:"😊", key:"sentiment_score",  color:"#f59e0b" },
+  ];
+
+  const LINE_COLORS = {instagram:"#c084fc",youtube:"#f87171",linkedin:"#60a5fa",facebook:"#4ade80",twitter:"#fbbf24"};
+  const sentDist = data.sentiment_distribution || {positive:61,neutral:24,negative:15};
+  const sentData = [
+    {name:"Positive",value:sentDist.positive,color:"#10b981"},
+    {name:"Neutral", value:sentDist.neutral, color:"#f59e0b"},
+    {name:"Negative",value:sentDist.negative,color:"#ef4444"},
+  ];
+  const platData = (data.platform_performance || []).map(p => ({
+    name: p.platform.replace(" (Twitter)",""),
+    reach: p.reach,
+    eng: p.engagement,
+  }));
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      {/* Header */}
+      <div style={{display:"flex",flexWrap:"wrap",alignItems:"flex-start",justifyContent:"space-between",gap:12}}>
+        <div>
+          <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Your Social Media Command Center</h1>
+          <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>
+            {new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}
+            {" "}· Simulated analytics data
+          </p>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {data.demo_mode && <DemoTag/>}
+          {loading && <Spinner/>}
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16}}>
+        {kpis.map(k => {
+          const kpi = (data.kpis || {})[k.key] || {};
+          return (
+            <div key={k.key} className="kpi-card">
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+                <div style={{width:36,height:36,borderRadius:8,background:`${k.color}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>
+                  {k.icon}
+                </div>
+                <span className={`badge ${kpi.trend === "up" ? "badge-green" : "badge-red"}`} style={{fontSize:11}}>
+                  {kpi.trend === "up" ? "↑" : "↓"} {kpi.change}
+                </span>
+              </div>
+              <div style={{fontSize:22,fontWeight:700,color:"#fff"}}>{kpi.value || "—"}</div>
+              <div style={{fontSize:12,color:"#8b929e",marginTop:4}}>{k.label}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Charts row */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 300px",gap:16}}>
+        <div className="card" style={{minWidth:0}}>
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Weekly Engagement</h3>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={data.weekly_engagement} margin={{top:4,right:16,left:-10,bottom:0}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#252d3d"/>
+              <XAxis dataKey="day" stroke="#8b929e" tick={{fontSize:11}} tickLine={false}/>
+              <YAxis stroke="#8b929e" tick={{fontSize:11}} tickLine={false} axisLine={false}/>
+              <Tooltip content={<ChartTip/>}/>
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize:11,color:"#8b929e"}}/>
+              {Object.entries(LINE_COLORS).map(([k,c]) =>
+                <Line key={k} type="monotone" dataKey={k} stroke={c} strokeWidth={2} dot={false} activeDot={{r:4}}/>
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="card">
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Sentiment</h3>
+          <ResponsiveContainer width="100%" height={160}>
+            <PieChart>
+              <Pie data={sentData} cx="50%" cy="50%" innerRadius={42} outerRadius={68} dataKey="value" paddingAngle={3}>
+                {sentData.map((e,i) => <Cell key={i} fill={e.color}/>)}
+              </Pie>
+              <Tooltip formatter={(v) => [`${v}%`]} contentStyle={{background:"#1c2333",border:"1px solid #252d3d",borderRadius:8,fontSize:12}}/>
+            </PieChart>
+          </ResponsiveContainer>
+          <div style={{display:"flex",justifyContent:"space-around",marginTop:8}}>
+            {sentData.map(s => (
+              <div key={s.name} style={{textAlign:"center"}}>
+                <div style={{fontWeight:700,fontSize:14,color:s.color}}>{s.value}%</div>
+                <div style={{fontSize:11,color:"#8b929e"}}>{s.name}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Platform bar chart */}
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Platform Performance</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={platData} margin={{top:4,right:16,left:-10,bottom:0}}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#252d3d"/>
+            <XAxis dataKey="name" stroke="#8b929e" tick={{fontSize:11}} tickLine={false}/>
+            <YAxis stroke="#8b929e" tick={{fontSize:11}} tickLine={false} axisLine={false}/>
+            <Tooltip content={<ChartTip/>}/>
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize:11,color:"#8b929e"}}/>
+            <Bar dataKey="reach" fill="#10b981" radius={[4,4,0,0]} name="Reach"/>
+            <Bar dataKey="eng"   fill="#3b82f6" radius={[4,4,0,0]} name="Eng%"/>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Posts + Hashtags */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 320px",gap:16}}>
+        <div className="card" style={{minWidth:0}}>
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Recent Post Performance</h3>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Post</th><th>Platform</th><th>Reach</th><th>Likes</th><th>Sentiment</th></tr>
+              </thead>
+              <tbody>
+                {(data.recent_posts || []).map((p,i) => (
+                  <tr key={i}>
+                    <td style={{maxWidth:220,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"#c9d1d9"}} title={p.post}>{p.post}</td>
+                    <td><PlatformBadge p={p.platform}/></td>
+                    <td style={{color:"#fff"}}>{(p.reach||0).toLocaleString()}</td>
+                    <td style={{color:"#fff"}}>{(p.likes||0).toLocaleString()}</td>
+                    <td>
+                      <span className={`badge ${p.sentiment==="Positive"?"badge-green":p.sentiment==="Negative"?"badge-red":"badge-yellow"}`}>
+                        {p.sentiment}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>🔥 Trending Hashtags</h3>
+          <div style={{display:"flex",flexDirection:"column",gap:12}}>
+            {(data.trending_hashtags || []).map((h,i) => (
+              <div key={i}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                  <span style={{fontSize:13,fontWeight:600,color:"#10b981"}}>{h.tag}</span>
+                  <span style={{fontSize:12,fontWeight:600,color:"#f59e0b"}}>{h.growth}</span>
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div className="progress-bar" style={{flex:1}}>
+                    <div className="progress-fill" style={{width:`${h.relevance}%`,background:"linear-gradient(90deg,#10b981,#3b82f6)"}}/>
+                  </div>
+                  <span style={{fontSize:11,color:"#8b929e",minWidth:28}}>{h.relevance}%</span>
+                </div>
+                <p style={{fontSize:11,color:"#8b929e",marginTop:2}}>{((h.volume||0)/1000).toFixed(0)}K posts</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── AI STRATEGY AGENT ─────────────────────────────────────────────────────────
+function StrategyAgent() {
+  const [form, setForm] = useState({niche:"",audience:"",goal:"",platform:"Instagram",tone:"professional"});
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  const submit = async () => {
+    if (!form.niche.trim()) return;
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const r = await apiFetch("/generate-strategy", {method:"POST", body:JSON.stringify(form)});
+      setResult(r);
+    } catch(e) { setError(e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div>
+        <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>AI Strategy Agent</h1>
+        <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Generate a complete AI-powered social media strategy</p>
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:20}}>Strategy Brief</h3>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:14,marginBottom:20}}>
+          {[
+            {key:"niche",    label:"Creator Niche *",   ph:"fitness, tech, finance",   type:"input"},
+            {key:"audience", label:"Target Audience",    ph:"Gen Z entrepreneurs",      type:"input"},
+            {key:"goal",     label:"Primary Goal",       ph:"grow followers, sales",    type:"input"},
+            {key:"platform", label:"Platform",           opts:["Instagram","YouTube","LinkedIn","Facebook","X (Twitter)","TikTok"]},
+            {key:"tone",     label:"Brand Tone",         opts:["professional","casual","inspirational","educational","humorous","authoritative"]},
+          ].map(f => (
+            <div key={f.key}>
+              <label style={{display:"block",fontSize:12,fontWeight:500,color:"#8b929e",marginBottom:6}}>{f.label}</label>
+              {f.opts
+                ? <select className="select" style={{width:"100%"}} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))}>
+                    {f.opts.map(o=><option key={o}>{o}</option>)}
+                  </select>
+                : <input type="text" className="input" placeholder={f.ph} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))}/>
+              }
+            </div>
+          ))}
+        </div>
+        <button className="btn-primary" onClick={submit} disabled={loading || !form.niche.trim()}>
+          {loading ? <><Spinner/>&nbsp;Generating…</> : "⚡ Generate AI Strategy"}
+        </button>
+        {error && <p style={{color:"#f87171",fontSize:13,marginTop:10}}>Error: {error}</p>}
+      </div>
+
+      {result && (
+        <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:16}}>
+          {result.demo_mode && <div style={{display:"flex",alignItems:"center",gap:8}}><DemoTag/><span style={{fontSize:12,color:"#8b929e"}}>Demo responses — not generated by IBM Granite</span></div>}
+
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:16}}>
+            <div className="card">
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <h3 style={{fontWeight:600,color:"#fff"}}>Strategy Overview</h3>
+                <CopyBtn text={result.strategy}/>
+              </div>
+              <p style={{fontSize:14,lineHeight:1.75,color:"#c9d1d9"}}>{result.strategy}</p>
+            </div>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>Hashtags</h3>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:16}}>
+                {(result.hashtags||[]).map((h,i)=><span key={i} className="badge badge-green">{h}</span>)}
+              </div>
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:10}}>Best Formats</h3>
+              {(result.formats||[]).map((f,i)=>(
+                <div key={i} style={{fontSize:13,color:"#c9d1d9",display:"flex",gap:6,marginBottom:4}}>
+                  <span style={{color:"#10b981"}}>▸</span> {f}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16}}>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>🔥 Trending Topics</h3>
+              {(result.trending_topics||[]).map((t,i)=>(
+                <div key={i} style={{fontSize:13,background:"#161b27",padding:"8px 10px",borderRadius:6,marginBottom:6,color:"#c9d1d9"}}>{t}</div>
+              ))}
+            </div>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>📅 Posting Schedule</h3>
+              {Object.entries(result.schedule||{}).map(([day,content])=>(
+                <div key={day} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                  <span className="badge badge-blue" style={{minWidth:36,justifyContent:"center"}}>{day}</span>
+                  <span style={{fontSize:12,color:"#c9d1d9"}}>{content}</span>
+                </div>
+              ))}
+            </div>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>🚀 Opportunities</h3>
+              {(result.opportunities||[]).map((o,i)=>(
+                <div key={i} style={{fontSize:13,padding:"8px 10px",borderRadius:6,marginBottom:6,background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.15)",color:"#c9d1d9"}}>{o}</div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card">
+            <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>✅ Actionable Recommendations</h3>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:10}}>
+              {(result.recommendations||[]).map((r,i)=>(
+                <div key={i} style={{display:"flex",gap:10,padding:"10px 12px",background:"#161b27",border:"1px solid #252d3d",borderRadius:8}}>
+                  <span style={{color:"#10b981",fontWeight:700,fontSize:14,flexShrink:0}}>{i+1}.</span>
+                  <span style={{fontSize:13,color:"#c9d1d9"}}>{r}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AI CONTENT STUDIO ─────────────────────────────────────────────────────────
+function ContentStudio() {
+  const [form, setForm] = useState({platform:"Instagram",topic:"",tone:"casual",content_type:"caption",image_description:""});
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [image, setImage] = useState(null);
+  const [tab, setTab] = useState("main");
+  const fileRef = useRef();
+
+  const handleFile = e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) setImage(URL.createObjectURL(f));
+  };
+
+  const generate = async () => {
+    if (!form.topic.trim()) return;
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const r = await apiFetch("/generate-content", {method:"POST", body:JSON.stringify(form)});
+      setResult(r); setTab("main");
+    } catch(e) { setError(e.message); }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div>
+        <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>AI Content Studio</h1>
+        <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Generate platform-optimized content with IBM Granite</p>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:20,alignItems:"start"}}>
+        {/* Brief panel */}
+        <div className="card" style={{display:"flex",flexDirection:"column",gap:12}}>
+          <h3 style={{fontWeight:600,color:"#fff"}}>Content Brief</h3>
+          {[
+            {key:"platform",     label:"Platform",      opts:["Instagram","YouTube","LinkedIn","Facebook","X (Twitter)","TikTok"]},
+            {key:"tone",         label:"Tone",          opts:["casual","professional","inspirational","educational","humorous","bold"]},
+            {key:"content_type", label:"Content Type",  opts:["caption","thread","script","bio","ad copy","email subject"]},
+          ].map(f=>(
+            <div key={f.key}>
+              <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>{f.label}</label>
+              <select className="select" style={{width:"100%"}} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))}>
+                {f.opts.map(o=><option key={o}>{o}</option>)}
+              </select>
+            </div>
+          ))}
+          <div>
+            <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>Content Topic *</label>
+            <input type="text" className="input" placeholder="e.g. morning productivity routine"
+              value={form.topic} onChange={e=>setForm(p=>({...p,topic:e.target.value}))}/>
+          </div>
+          <div>
+            <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>Image Description (optional)</label>
+            <textarea className="textarea" style={{minHeight:65}} placeholder="Describe any image context…"
+              value={form.image_description} onChange={e=>setForm(p=>({...p,image_description:e.target.value}))}/>
+          </div>
+
+          <div className="upload-zone" onClick={()=>fileRef.current && fileRef.current.click()}>
+            {image
+              ? <img src={image} alt="preview" style={{maxHeight:120,borderRadius:6,margin:"0 auto",display:"block"}}/>
+              : <div style={{color:"#8b929e"}}>
+                  <div style={{fontSize:24}}>📎</div>
+                  <p style={{fontSize:12,marginTop:6}}>Upload image for context</p>
+                  <p style={{fontSize:11,color:"#374151",marginTop:2}}>Description is used, not AI image analysis</p>
+                </div>
+            }
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFile}/>
+          {image && <button className="btn-secondary" style={{fontSize:12,padding:"6px 12px"}} onClick={()=>setImage(null)}>Remove image</button>}
+
+          <button className="btn-primary" onClick={generate} disabled={loading || !form.topic.trim()}>
+            {loading ? <><Spinner/>&nbsp;Generating…</> : "✨ Generate Content"}
+          </button>
+          {error && <p style={{color:"#f87171",fontSize:12}}>{error}</p>}
+        </div>
+
+        {/* Result panel */}
+        <div>
+          {!result && !loading && (
+            <div className="card" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:360,color:"#8b929e"}}>
+              <div style={{fontSize:48}}>✍️</div>
+              <p style={{marginTop:12,fontSize:14}}>Fill the brief and click Generate Content</p>
+            </div>
+          )}
+          {loading && (
+            <div className="card" style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:360}}>
+              <Spinner/>
+              <p style={{marginTop:12,fontSize:13,color:"#8b929e"}}>Crafting your content…</p>
+            </div>
+          )}
+          {result && (
+            <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:14}}>
+              {result.demo_mode && <DemoTag/>}
+              <div style={{display:"flex",gap:8}}>
+                <button className={`tab-btn ${tab==="main"?"active":""}`} onClick={()=>setTab("main")}>Main Version</button>
+                <button className={`tab-btn ${tab==="alt"?"active":""}`}  onClick={()=>setTab("alt")}>Alternate Version</button>
+              </div>
+
+              <div className="card">
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <h4 style={{fontSize:13,fontWeight:600,color:"#10b981"}}>Hook</h4>
+                  <CopyBtn text={result.hook}/>
+                </div>
+                <div className="result-box" style={{color:"#fff",fontWeight:500}}>{result.hook}</div>
+              </div>
+
+              <div className="card">
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <h4 style={{fontSize:13,fontWeight:600,color:"#10b981"}}>{tab==="main"?"Caption":"Alternate Caption"}</h4>
+                  <CopyBtn text={tab==="main"?result.caption:result.alternate}/>
+                </div>
+                <div className="result-box" style={{color:"#c9d1d9"}}>{tab==="main"?result.caption:result.alternate}</div>
+              </div>
+
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                <div className="card">
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                    <h4 style={{fontSize:13,fontWeight:600,color:"#10b981"}}>Hashtags</h4>
+                    <CopyBtn text={(result.hashtags||[]).join(" ")}/>
+                  </div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                    {(result.hashtags||[]).map((h,i)=><span key={i} className="badge badge-purple">{h}</span>)}
+                  </div>
+                </div>
+                <div className="card">
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                    <h4 style={{fontSize:13,fontWeight:600,color:"#10b981"}}>CTA</h4>
+                    <CopyBtn text={result.cta}/>
+                  </div>
+                  <div className="result-box" style={{color:"#c9d1d9"}}>{result.cta}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── SENTIMENT ANALYZER ────────────────────────────────────────────────────────
+function SentimentAnalyzer() {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  const analyze = async () => {
+    if (!text.trim()) return;
+    setLoading(true); setError(null); setResult(null);
+    try {
+      const r = await apiFetch("/analyze-sentiment", {method:"POST", body:JSON.stringify({text})});
+      setResult(r);
+    } catch(e) { setError(e.message); }
+    setLoading(false);
+  };
+
+  const sentData = result ? [
+    {name:"Positive",value:result.positive||0,color:"#10b981"},
+    {name:"Neutral", value:result.neutral||0, color:"#f59e0b"},
+    {name:"Negative",value:result.negative||0,color:"#ef4444"},
+  ] : [];
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div>
+        <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Sentiment Analyzer</h1>
+        <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Paste comments or reviews for AI-powered sentiment analysis</p>
+      </div>
+
+      <div className="card">
+        <label style={{display:"block",fontSize:13,fontWeight:500,color:"#8b929e",marginBottom:8}}>Paste comments, reviews or social text</label>
+        <textarea className="textarea" style={{minHeight:160}}
+          placeholder={"Paste multiple comments here, one per line…"}
+          value={text} onChange={e=>setText(e.target.value)}/>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginTop:12}}>
+          <button className="btn-primary" onClick={analyze} disabled={loading||!text.trim()}>
+            {loading ? <><Spinner/>&nbsp;Analyzing…</> : "😊 Analyze Sentiment"}
+          </button>
+          {text && <button className="btn-secondary" onClick={()=>{setText("");setResult(null);}}>Clear</button>}
+          <span style={{marginLeft:"auto",fontSize:12,color:"#8b929e"}}>{text.length} chars</span>
+        </div>
+        {error && <p style={{color:"#f87171",fontSize:13,marginTop:8}}>{error}</p>}
+      </div>
+
+      {result && (
+        <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:16}}>
+          {result.demo_mode && <div style={{display:"flex",alignItems:"center",gap:8}}><DemoTag/><span style={{fontSize:12,color:"#8b929e"}}>Keyword-based demo — not IBM Granite output</span></div>}
+
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+            {sentData.map(s=>(
+              <div key={s.name} className="kpi-card" style={{textAlign:"center"}}>
+                <div style={{fontSize:32,fontWeight:700,color:s.color,marginBottom:4}}>{s.value}%</div>
+                <div style={{fontSize:13,fontWeight:600,color:"#fff"}}>{s.name}</div>
+                <div className="progress-bar" style={{marginTop:10}}>
+                  <div className="progress-fill" style={{width:`${s.value}%`,background:s.color}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="card">
+            <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>Sentiment Breakdown</h3>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={sentData} layout="vertical" margin={{left:10,right:20,top:4,bottom:4}}>
+                <XAxis type="number" stroke="#8b929e" tick={{fontSize:11}} tickLine={false} domain={[0,100]}/>
+                <YAxis type="category" dataKey="name" stroke="#8b929e" tick={{fontSize:12}} tickLine={false} width={65}/>
+                <Tooltip contentStyle={{background:"#1c2333",border:"1px solid #252d3d",borderRadius:8,fontSize:12}} formatter={v=>[`${v}%`]}/>
+                <Bar dataKey="value" radius={[0,4,4,0]}>
+                  {sentData.map((e,i)=><Cell key={i} fill={e.color}/>)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16}}>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>🏷️ Common Themes</h3>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                {(result.themes||[]).map((t,i)=><span key={i} className="badge badge-blue">{t}</span>)}
+              </div>
+            </div>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>⚠️ Audience Concerns</h3>
+              {(result.concerns||[]).map((c,i)=>(
+                <div key={i} style={{fontSize:13,padding:"7px 10px",borderRadius:6,marginBottom:6,background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.15)",color:"#fca5a5"}}>{c}</div>
+              ))}
+            </div>
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>💡 Recommendations</h3>
+              {(result.recommendations||[]).map((r,i)=>(
+                <div key={i} style={{fontSize:13,color:"#c9d1d9",display:"flex",gap:6,marginBottom:6}}>
+                  <span style={{color:"#10b981",flexShrink:0}}>▸</span> {r}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── TREND RADAR ───────────────────────────────────────────────────────────────
+function TrendRadar() {
+  const [trends, setTrends] = useState(FALLBACK_TRENDS);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [filter, setFilter] = useState("all");
+
+  useEffect(() => {
+    apiFetch("/trends")
+      .then(d => { setTrends(d.trends || FALLBACK_TRENDS); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const niches = ["all", ...Array.from(new Set(trends.map(t => t.niche.split(" / ")[0])))];
+  const filtered = filter === "all" ? trends : trends.filter(t => t.niche.includes(filter));
+  const momColor = m => m>=90?"#10b981":m>=75?"#3b82f6":m>=60?"#f59e0b":"#ef4444";
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12}}>
+        <div>
+          <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Trend Radar</h1>
+          <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Simulated trend data — updated weekly</p>
+        </div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+          {niches.map(n=>(
+            <button key={n} className={`platform-filter ${filter===n?"active":""}`} onClick={()=>setFilter(n)}>
+              {n==="all"?"All Niches":n}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{display:"flex",justifyContent:"center",padding:"60px 0"}}><Spinner/></div>
+      ) : (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:16}}>
+          {filtered.map((t,i)=>(
+            <div key={i} className="trend-card" onClick={()=>setSelected(selected===t?null:t)}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                <h3 style={{fontWeight:600,color:"#fff",fontSize:14}}>{t.name}</h3>
+                <span className="badge badge-green">{t.growth}</span>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                <span style={{fontSize:11,color:"#8b929e",flexShrink:0}}>Momentum</span>
+                <div className="progress-bar" style={{flex:1}}>
+                  <div className="progress-fill" style={{width:`${t.momentum}%`,background:momColor(t.momentum)}}/>
+                </div>
+                <span style={{fontSize:12,fontWeight:700,color:momColor(t.momentum),minWidth:24}}>{t.momentum}</span>
+              </div>
+              <p style={{fontSize:12,color:"#8b929e",marginBottom:10}}>{t.niche}</p>
+              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                {t.hashtags.map((h,j)=><span key={j} className="badge badge-purple" style={{fontSize:11}}>{h}</span>)}
+              </div>
+              {selected===t && (
+                <div className="fade-in" style={{marginTop:14,paddingTop:14,borderTop:"1px solid #252d3d"}}>
+                  <p style={{fontSize:12,fontWeight:600,color:"#10b981",marginBottom:4}}>Recommended Content Angle</p>
+                  <p style={{fontSize:13,color:"#c9d1d9"}}>{t.angle}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── COMPETITOR INTELLIGENCE ───────────────────────────────────────────────────
+function CompetitorIntelligence() {
+  const [competitors, setCompetitors] = useState(FALLBACK_COMPETITORS);
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  useEffect(() => {
+    apiFetch("/competitors")
+      .then(d => { setCompetitors(d.competitors || FALLBACK_COMPETITORS); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const runAnalysis = async () => {
+    setAiLoading(true); setAnalysis(null);
+    try {
+      const r = await apiFetch("/analyze-competitors", {method:"POST", body:"{}"});
+      setAnalysis(r);
+    } catch(e) {}
+    setAiLoading(false);
+  };
+
+  const engColor = e => e>=8?"#10b981":e>=5?"#3b82f6":e>=3?"#f59e0b":"#ef4444";
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:12}}>
+        <div>
+          <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Competitor Intelligence</h1>
+          <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Simulated competitor benchmarks</p>
+        </div>
+        <button className="btn-primary" onClick={runAnalysis} disabled={aiLoading}>
+          {aiLoading ? <><Spinner/>&nbsp;Analyzing…</> : "🧠 AI Competitor Analysis"}
+        </button>
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Competitor Overview</h3>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Brand</th><th>Niche</th><th>Platform</th><th>Followers</th><th>Eng. Rate</th><th>Top Formats</th><th>Growth</th></tr>
+            </thead>
+            <tbody>
+              {competitors.map((c,i)=>(
+                <tr key={i}>
+                  <td style={{fontWeight:600,color:"#fff"}}>{c.name}</td>
+                  <td style={{color:"#8b929e"}}>{c.niche}</td>
+                  <td><PlatformBadge p={c.platform}/></td>
+                  <td style={{color:"#fff"}}>{((c.followers||0)/1000).toFixed(0)}K</td>
+                  <td><span style={{color:engColor(c.eng_rate),fontWeight:600}}>{c.eng_rate}%</span></td>
+                  <td>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                      {(c.top_formats||[]).map((f,j)=><span key={j} className="badge badge-blue" style={{fontSize:10}}>{f}</span>)}
+                    </div>
+                  </td>
+                  <td><span className="badge badge-green">{c.growth}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Follower Comparison</h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={competitors.map(c=>({name:c.name,followers:Math.round((c.followers||0)/1000),eng:c.eng_rate}))} margin={{top:4,right:16,left:-10,bottom:0}}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#252d3d"/>
+            <XAxis dataKey="name" stroke="#8b929e" tick={{fontSize:11}} tickLine={false}/>
+            <YAxis stroke="#8b929e" tick={{fontSize:11}} tickLine={false} axisLine={false}/>
+            <Tooltip content={<ChartTip/>}/>
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize:11,color:"#8b929e"}}/>
+            <Bar dataKey="followers" fill="#10b981" radius={[4,4,0,0]} name="Followers (K)"/>
+            <Bar dataKey="eng"       fill="#3b82f6" radius={[4,4,0,0]} name="Eng%"/>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {analysis && (
+        <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:14}}>
+          {analysis.demo_mode && <DemoTag/>}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:14}}>
+            {[
+              ["🟢 Opportunities","opportunities","rgba(16,185,129,.08)","rgba(16,185,129,.2)","#a7f3d0"],
+              ["🔴 Competitor Weaknesses","weaknesses","rgba(239,68,68,.08)","rgba(239,68,68,.2)","#fca5a5"],
+              ["🟡 Content Gaps","content_gaps","rgba(245,158,11,.08)","rgba(245,158,11,.2)","#fde68a"],
+              ["🔵 Recommendations","recommendations","rgba(59,130,246,.08)","rgba(59,130,246,.2)","#bfdbfe"],
+            ].map(([title,key,bg,border,color])=>(
+              <div key={key} style={{background:bg,border:`1px solid ${border}`,borderRadius:12,padding:18}}>
+                <h3 style={{fontWeight:600,color:"#e6edf3",marginBottom:10}}>{title}</h3>
+                {(analysis[key]||[]).map((item,i)=>(
+                  <div key={i} style={{fontSize:13,color:"#c9d1d9",display:"flex",gap:6,marginBottom:6}}>
+                    <span style={{color,flexShrink:0}}>▸</span>{item}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── AUDIENCE INSIGHTS ─────────────────────────────────────────────────────────
+function AudienceInsights() {
+  const ageData = [
+    {age:"13-17",pct:8},{age:"18-24",pct:31},{age:"25-34",pct:38},
+    {age:"35-44",pct:14},{age:"45-54",pct:6},{age:"55+",pct:3},
+  ];
+  const interestData = [
+    {name:"Tech & AI",pct:72},{name:"Entrepreneurship",pct:68},{name:"Personal Finance",pct:61},
+    {name:"Productivity",pct:57},{name:"Marketing",pct:53},{name:"Health",pct:41},
+  ];
+  const geoData = [
+    {country:"USA",pct:42},{country:"UK",pct:14},{country:"Canada",pct:11},
+    {country:"Australia",pct:8},{country:"Germany",pct:6},{country:"Others",pct:19},
+  ];
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div>
+        <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Audience Insights</h1>
+        <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Simulated audience demographics</p>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16}}>
+        {[
+          {label:"Total Followers",value:"119,400",sub:"Across all platforms",color:"#10b981"},
+          {label:"Avg. Active Rate",value:"68%",sub:"Last 30 days",color:"#3b82f6"},
+          {label:"Top Country",value:"USA",sub:"42% of audience",color:"#8b5cf6"},
+        ].map(k=>(
+          <div key={k.label} className="kpi-card">
+            <div style={{fontSize:26,fontWeight:700,color:k.color,marginBottom:4}}>{k.value}</div>
+            <div style={{fontSize:14,fontWeight:600,color:"#fff"}}>{k.label}</div>
+            <div style={{fontSize:12,color:"#8b929e",marginTop:4}}>{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+        <div className="card">
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Age Distribution</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={ageData} margin={{top:4,right:16,left:-10,bottom:0}}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#252d3d"/>
+              <XAxis dataKey="age" stroke="#8b929e" tick={{fontSize:11}} tickLine={false}/>
+              <YAxis stroke="#8b929e" tick={{fontSize:11}} tickLine={false} axisLine={false} unit="%"/>
+              <Tooltip contentStyle={{background:"#1c2333",border:"1px solid #252d3d",borderRadius:8,fontSize:12}} formatter={v=>[`${v}%`]}/>
+              <Bar dataKey="pct" fill="#10b981" radius={[4,4,0,0]} name="Audience %"/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="card">
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Top Interests</h3>
+          {interestData.map(d=>(
+            <div key={d.name} style={{marginBottom:10}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:4}}>
+                <span style={{color:"#c9d1d9"}}>{d.name}</span>
+                <span style={{color:"#10b981",fontWeight:600}}>{d.pct}%</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{width:`${d.pct}%`,background:"linear-gradient(90deg,#10b981,#3b82f6)"}}/>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Geographic Distribution</h3>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:12}}>
+          {geoData.map(g=>(
+            <div key={g.country} style={{textAlign:"center",padding:"12px 8px",background:"#161b27",borderRadius:8,border:"1px solid #252d3d"}}>
+              <div style={{fontSize:22,fontWeight:700,color:"#10b981"}}>{g.pct}%</div>
+              <div style={{fontSize:12,color:"#8b929e",marginTop:4}}>{g.country}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── CONTENT CALENDAR ──────────────────────────────────────────────────────────
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const CPLATFORMS = ["Instagram","YouTube","LinkedIn","Facebook","X","TikTok"];
+const STATUSES = ["Idea","Planned","Published"];
+const SCOL = {Idea:"#f59e0b",Planned:"#3b82f6",Published:"#10b981"};
+
+function ContentCalendar() {
+  const [posts, setPosts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("sp_calendar") || "[]"); } catch { return []; }
+  });
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState({day:"Monday",platform:"Instagram",topic:"",status:"Idea"});
+
+  const savePosts = updated => {
+    setPosts(updated);
+    try { localStorage.setItem("sp_calendar", JSON.stringify(updated)); } catch(e){}
+  };
+
+  const save = () => {
+    if (!form.topic.trim()) return;
+    const updated = modal && modal.id
+      ? posts.map(p => p.id === modal.id ? {...form, id:modal.id} : p)
+      : [...posts, {...form, id: Date.now()}];
+    savePosts(updated);
+    setModal(null);
+    setForm({day:"Monday",platform:"Instagram",topic:"",status:"Idea"});
+  };
+
+  const remove = id => savePosts(posts.filter(p => p.id !== id));
+
+  const cycleStatus = id => savePosts(posts.map(p => {
+    if (p.id !== id) return p;
+    return {...p, status: STATUSES[(STATUSES.indexOf(p.status)+1) % STATUSES.length]};
+  }));
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:12}}>
+        <div>
+          <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Content Calendar</h1>
+          <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Weekly planner — persisted in browser</p>
+        </div>
+        <button className="btn-primary" onClick={()=>{setForm({day:"Monday",platform:"Instagram",topic:"",status:"Idea"});setModal({id:null});}}>
+          + Add Content
+        </button>
+      </div>
+
+      <div style={{display:"flex",gap:16,flexWrap:"wrap",fontSize:12,color:"#8b929e"}}>
+        {STATUSES.map(s=>(
+          <span key={s} style={{display:"flex",alignItems:"center",gap:4}}>
+            <span style={{display:"inline-block",width:8,height:8,borderRadius:"50%",background:SCOL[s]}}/>
+            {s}
+          </span>
+        ))}
+        <span style={{color:"#374151"}}>• Click dot to cycle status • Click title to edit</span>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:8}}>
+        {DAYS.map(day=>{
+          const dayPosts = posts.filter(p=>p.day===day);
+          return (
+            <div key={day} className="cal-slot">
+              <div style={{fontSize:11,fontWeight:600,color:"#10b981",marginBottom:6}}>
+                {day.slice(0,3).toUpperCase()}
+              </div>
+              {dayPosts.length===0 && <div style={{fontSize:11,color:"#374151",textAlign:"center",marginTop:16}}>—</div>}
+              {dayPosts.map(p=>(
+                <div key={p.id} className="cal-post" style={{background:`${SCOL[p.status]}18`,border:`1px solid ${SCOL[p.status]}40`}}>
+                  <div style={{display:"flex",alignItems:"flex-start",gap:3}}>
+                    <span style={{cursor:"pointer",flexShrink:0,marginTop:1}} onClick={()=>cycleStatus(p.id)} title="Cycle status">
+                      <span style={{display:"inline-block",width:7,height:7,borderRadius:"50%",background:SCOL[p.status]}}/>
+                    </span>
+                    <span style={{cursor:"pointer",color:"#c9d1d9",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}
+                      title={p.topic} onClick={()=>{setForm({...p});setModal(p);}}>
+                      {p.topic}
+                    </span>
+                    <span style={{cursor:"pointer",color:"#ef4444",fontSize:10,flexShrink:0}} onClick={()=>remove(p.id)}>✕</span>
+                  </div>
+                  <div style={{fontSize:10,color:"#8b929e",marginTop:2}}>{p.platform}</div>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+
+      {posts.length > 0 && (
+        <div className="card">
+          <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>All Planned Content ({posts.length})</h3>
+          <div className="table-wrap">
+            <table>
+              <thead><tr><th>Topic</th><th>Day</th><th>Platform</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                {posts.map(p=>(
+                  <tr key={p.id}>
+                    <td style={{color:"#c9d1d9"}}>{p.topic}</td>
+                    <td style={{color:"#8b929e"}}>{p.day}</td>
+                    <td><PlatformBadge p={p.platform}/></td>
+                    <td>
+                      <span style={{color:SCOL[p.status],fontWeight:600,fontSize:12,cursor:"pointer"}}
+                        onClick={()=>cycleStatus(p.id)}>{p.status} ↻</span>
+                    </td>
+                    <td style={{display:"flex",gap:6}}>
+                      <button className="copy-btn" onClick={()=>{setForm({...p});setModal(p);}}>Edit</button>
+                      <button className="copy-btn" style={{color:"#ef4444"}} onClick={()=>remove(p.id)}>Del</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {modal !== null && (
+        <div className="modal-overlay" onClick={e=>{if(e.target===e.currentTarget)setModal(null);}}>
+          <div className="modal fade-in">
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <h3 style={{fontWeight:600,color:"#fff"}}>{modal.id?"Edit Content":"Add Content"}</h3>
+              <button className="btn-secondary" style={{padding:"4px 10px",fontSize:13}} onClick={()=>setModal(null)}>✕</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div>
+                <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>Content Topic</label>
+                <input type="text" className="input" placeholder="e.g. 5 AI tools for creators"
+                  value={form.topic} onChange={e=>setForm(p=>({...p,topic:e.target.value}))} autoFocus/>
+              </div>
+              {[["day","Day",DAYS],["platform","Platform",CPLATFORMS],["status","Status",STATUSES]].map(([key,label,opts])=>(
+                <div key={key}>
+                  <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>{label}</label>
+                  <select className="select" style={{width:"100%"}} value={form[key]}
+                    onChange={e=>setForm(p=>({...p,[key]:e.target.value}))}>
+                    {opts.map(o=><option key={o}>{o}</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",gap:10,marginTop:20}}>
+              <button className="btn-primary" style={{flex:1}} onClick={save} disabled={!form.topic.trim()}>Save</button>
+              <button className="btn-secondary" onClick={()=>setModal(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+function Settings() {
+  const [health, setHealth] = useState(null);
+  useEffect(()=>{
+    apiFetch("/health").then(setHealth).catch(()=>setHealth({status:"error",demo_mode:true,model:"unavailable"}));
+  },[]);
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      <div>
+        <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>Settings</h1>
+        <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>Configuration and connection status</p>
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Backend Connection</h3>
+        {health ? (
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span className={`badge ${health.status==="ok"?"badge-green":"badge-red"}`}>
+                {health.status==="ok"?"✓ Connected":"✗ Disconnected"}
+              </span>
+              <span style={{fontSize:13,color:"#8b929e"}}>Flask API at http://127.0.0.1:5000</span>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <span className={`badge ${health.demo_mode?"badge-yellow":"badge-green"}`}>
+                {health.demo_mode?"⚡ Demo Mode":"✓ IBM Granite Active"}
+              </span>
+              <span style={{fontSize:13,color:"#8b929e"}}>
+                {health.demo_mode?"No IBM credentials — set WATSONX_API_KEY and WATSONX_PROJECT_ID":`Model: ${health.model}`}
+              </span>
+            </div>
+          </div>
+        ) : <Spinner/>}
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>IBM Watsonx Configuration</h3>
+        <p style={{fontSize:13,color:"#8b929e",marginBottom:14}}>
+          Set these in <code style={{color:"#10b981",background:"#161b27",padding:"2px 6px",borderRadius:4}}>backend/.env</code> to enable IBM Granite AI:
+        </p>
+        {[
+          ["WATSONX_API_KEY","Your IBM Cloud API key"],
+          ["WATSONX_PROJECT_ID","Your watsonx.ai project ID"],
+          ["WATSONX_URL","https://us-south.ml.cloud.ibm.com"],
+          ["WATSONX_MODEL_ID","ibm/granite-13b-instruct-v2"],
+        ].map(([k,v])=>(
+          <div key={k} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"10px 12px",background:"#161b27",border:"1px solid #252d3d",borderRadius:8,marginBottom:6}}>
+            <code style={{color:"#10b981",fontSize:13,minWidth:220,flexShrink:0}}>{k}</code>
+            <span style={{fontSize:12,color:"#8b929e"}}>{v}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <h3 style={{fontWeight:600,color:"#fff",marginBottom:12}}>About SocialPulse AI</h3>
+        <p style={{fontSize:14,color:"#8b929e",lineHeight:1.8}}>
+          SocialPulse AI is an intelligent social media analytics and content generation platform powered by IBM Granite via watsonx.ai.
+          Built for creators, influencers, and businesses to understand their audience, outperform competitors, and generate AI-powered content strategies.
+        </p>
+        <p style={{fontSize:12,color:"#374151",marginTop:8}}>
+          All analytics shown are simulated sample data for demonstration purposes. Not connected to live social platform APIs.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── YOUTUBE CHANNEL ANALYZER ─────────────────────────────────────────────────
+function fmtNum(n) {
+  if (n == null) return "Hidden";
+  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
+  if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
+  return n.toLocaleString();
+}
+function fmtDate(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-US", {year:"numeric",month:"short",day:"numeric"});
+}
+function parseDur(iso) {
+  if (!iso) return "";
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return iso;
+  const h = parseInt(m[1]||0), mi = parseInt(m[2]||0), s = parseInt(m[3]||0);
+  if (h) return `${h}:${String(mi).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  return `${mi}:${String(s).padStart(2,"0")}`;
+}
+
+const CURRENCIES = [
+  {code:"USD", symbol:"$",  rate:1},
+  {code:"INR", symbol:"₹",  rate:84},
+  {code:"EUR", symbol:"€",  rate:0.92},
+  {code:"GBP", symbol:"£",  rate:0.79},
+];
+
+function YouTubeAnalyzer() {
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [currency, setCurrency] = useState("USD");
+  const [rpmLong, setRpmLong] = useState(2.5);
+  const [rpmShort, setRpmShort] = useState(0.05);
+  const [videoTypes, setVideoTypes] = useState({});
+
+  const analyze = async () => {
+    if (!input.trim()) return;
+    setLoading(true); setError(null); setResult(null); setVideoTypes({});
+    try {
+      const r = await apiFetch("/youtube/analyze", {method:"POST", body:JSON.stringify({channel_input:input.trim()})});
+      setResult(r);
+      // seed type overrides from API classification
+      const types = {};
+      (r.videos||[]).forEach(v => { types[v.id] = v.type; });
+      setVideoTypes(types);
+    } catch(e) {
+      setError(e.message || "Unknown error");
+    }
+    setLoading(false);
+  };
+
+  const toggleType = id => setVideoTypes(t => ({...t, [id]: t[id]==="short"?"long":"short"}));
+
+  const cur = CURRENCIES.find(c=>c.code===currency)||CURRENCIES[0];
+
+  // Revenue calc
+  const revenues = (result?.videos||[]).map(v => {
+    const t = videoTypes[v.id] || v.type;
+    const rpm = t === "short" ? rpmShort : rpmLong;
+    return { id:v.id, est: (v.views / 1000) * rpm };
+  });
+  const totalEst = revenues.reduce((s,r)=>s+r.est, 0) * cur.rate;
+  const revMap = Object.fromEntries(revenues.map(r=>[r.id, r.est * cur.rate]));
+
+  // Chart data: top 10 by views
+  const chartData = [...(result?.videos||[])]
+    .sort((a,b)=>b.views-a.views)
+    .slice(0,10)
+    .map(v=>({name: v.title.length>28 ? v.title.slice(0,25)+"…" : v.title, views: v.views, likes: v.likes}));
+
+  const ch = result?.channel;
+
+  return (
+    <div className="fade-in" style={{display:"flex",flexDirection:"column",gap:24}}>
+      {/* Header */}
+      <div>
+        <h1 style={{fontSize:22,fontWeight:700,color:"#fff"}}>YouTube Channel Analyzer</h1>
+        <p style={{fontSize:13,color:"#8b929e",marginTop:4}}>
+          Paste any channel URL, @handle or channel ID — uses YouTube Data API v3
+        </p>
+      </div>
+
+      {/* Input */}
+      <div className="card" style={{display:"flex",gap:10,alignItems:"flex-start",flexWrap:"wrap"}}>
+        <div style={{flex:"1 1 340px"}}>
+          <input type="text" className="input"
+            placeholder="e.g. @MrBeast  or  youtube.com/@veritasium  or  UCxxxxxx"
+            value={input} onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&analyze()}
+            style={{fontSize:14}}/>
+        </div>
+        <button className="btn-primary" onClick={analyze} disabled={loading||!input.trim()}>
+          {loading ? <><Spinner/>&nbsp;Analyzing…</> : "🔍 Analyze Channel"}
+        </button>
+        {result && (
+          <button className="btn-secondary" onClick={()=>{setResult(null);setError(null);setInput("");}}>
+            New Search
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <div style={{background:"rgba(239,68,68,.1)",border:"1px solid rgba(239,68,68,.3)",borderRadius:10,padding:"14px 18px",color:"#fca5a5",fontSize:14}}>
+          ❌ {error}
+          {error.includes("quota") && <div style={{marginTop:6,fontSize:12,color:"#8b929e"}}>YouTube API free quota resets daily at midnight Pacific Time.</div>}
+          {error.includes("YOUTUBE_API_KEY") && (
+            <div style={{marginTop:6,fontSize:12,color:"#8b929e"}}>
+              Add <code style={{color:"#f59e0b"}}>YOUTUBE_API_KEY=your_key</code> to <code style={{color:"#f59e0b"}}>backend/.env</code> and restart Flask.
+            </div>
+          )}
+        </div>
+      )}
+
+      {result && ch && (
+        <>
+          {/* Channel card */}
+          <div className="card" style={{display:"flex",gap:20,alignItems:"flex-start",flexWrap:"wrap"}}>
+            {ch.avatar && (
+              <img src={ch.avatar} alt={ch.name} style={{width:80,height:80,borderRadius:"50%",border:"2px solid #252d3d",flexShrink:0}}/>
+            )}
+            <div style={{flex:1,minWidth:200}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+                <h2 style={{fontSize:20,fontWeight:700,color:"#fff"}}>{ch.name}</h2>
+                {ch.country && <span className="badge badge-blue">{ch.country}</span>}
+                <a href={ch.url} target="_blank" rel="noopener" style={{color:"#10b981",fontSize:12,textDecoration:"none"}}>↗ Open Channel</a>
+              </div>
+              <p style={{fontSize:12,color:"#8b929e",marginTop:4}}>Joined {fmtDate(ch.published_at)}</p>
+              {ch.description && (
+                <p style={{fontSize:13,color:"#8b929e",marginTop:8,lineHeight:1.6,maxWidth:600,
+                  overflow:"hidden",display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical"}}>
+                  {ch.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* KPI row */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:14}}>
+            {[
+              {label:"Subscribers",   val: ch.hidden_subs ? "Hidden" : fmtNum(ch.subscribers), icon:"👥", color:"#10b981"},
+              {label:"Total Views",   val: fmtNum(ch.total_views),  icon:"👁️", color:"#3b82f6"},
+              {label:"Videos",        val: fmtNum(ch.video_count),  icon:"🎬", color:"#8b5cf6"},
+              {label:"Fetched Views", val: fmtNum((result.videos||[]).reduce((s,v)=>s+v.views,0)), icon:"📊", color:"#f59e0b"},
+            ].map(k=>(
+              <div key={k.label} className="kpi-card">
+                <div style={{fontSize:22,marginBottom:4}}>{k.icon}</div>
+                <div style={{fontSize:22,fontWeight:700,color:k.color}}>{k.val}</div>
+                <div style={{fontSize:12,color:"#8b929e",marginTop:4}}>{k.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* RPM + Revenue panel */}
+          <div className="card">
+            <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
+              <div>
+                <h3 style={{fontWeight:600,color:"#fff"}}>📐 Estimated Revenue Calculator</h3>
+                <p style={{fontSize:12,color:"#8b929e",marginTop:3}}>
+                  Hypothetical estimates only — not actual earnings. RPM = Revenue Per Mille (1,000 views).
+                </p>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <label style={{fontSize:12,color:"#8b929e"}}>Currency</label>
+                <select className="select" value={currency} onChange={e=>setCurrency(e.target.value)} style={{width:90}}>
+                  {CURRENCIES.map(c=><option key={c.code} value={c.code}>{c.code} ({c.symbol})</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:14,marginBottom:20}}>
+              <div>
+                <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>
+                  Long-form RPM ({cur.symbol} per 1K views)
+                </label>
+                <input type="number" className="input" min="0" step="0.5"
+                  value={rpmLong} onChange={e=>setRpmLong(parseFloat(e.target.value)||0)}/>
+                <p style={{fontSize:11,color:"#374151",marginTop:3}}>Typical range: $1–$10 USD</p>
+              </div>
+              <div>
+                <label style={{display:"block",fontSize:12,color:"#8b929e",marginBottom:5}}>
+                  Shorts RPM ({cur.symbol} per 1K views)
+                </label>
+                <input type="number" className="input" min="0" step="0.01"
+                  value={rpmShort} onChange={e=>setRpmShort(parseFloat(e.target.value)||0)}/>
+                <p style={{fontSize:11,color:"#374151",marginTop:3}}>Typical range: $0.03–$0.07 USD</p>
+              </div>
+              <div className="kpi-card" style={{display:"flex",flexDirection:"column",justifyContent:"center"}}>
+                <div style={{fontSize:11,color:"#8b929e",marginBottom:4}}>Estimated earnings (20 videos)</div>
+                <div style={{fontSize:26,fontWeight:700,color:"#10b981"}}>
+                  {cur.symbol}{totalEst.toLocaleString("en-US",{maximumFractionDigits:0})}
+                </div>
+                <div style={{fontSize:11,color:"#374151",marginTop:4}}>
+                  ⚠️ Estimate only — not actual revenue
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top videos chart */}
+          {chartData.length > 0 && (
+            <div className="card">
+              <h3 style={{fontWeight:600,color:"#fff",marginBottom:16}}>Top 10 Videos by Views</h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={chartData} layout="vertical" margin={{left:10,right:40,top:4,bottom:4}}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#252d3d" horizontal={false}/>
+                  <XAxis type="number" stroke="#8b929e" tick={{fontSize:10}} tickLine={false} tickFormatter={v=>fmtNum(v)}/>
+                  <YAxis type="category" dataKey="name" stroke="#8b929e" tick={{fontSize:10}} tickLine={false} width={160}/>
+                  <Tooltip contentStyle={{background:"#1c2333",border:"1px solid #252d3d",borderRadius:8,fontSize:12}}
+                    formatter={(v,n)=>[fmtNum(v),n]}/>
+                  <Bar dataKey="views" fill="#10b981" radius={[0,4,4,0]} name="Views"/>
+                  <Bar dataKey="likes" fill="#3b82f6" radius={[0,4,4,0]} name="Likes"/>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Video table */}
+          {(result.videos||[]).length > 0 && (
+            <div className="card">
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+                <h3 style={{fontWeight:600,color:"#fff"}}>Recent Videos ({result.videos.length})</h3>
+                <p style={{fontSize:12,color:"#8b929e"}}>Click Short/Long to toggle classification for revenue estimate</p>
+              </div>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style={{width:60}}>Thumb</th>
+                      <th>Title</th>
+                      <th>Published</th>
+                      <th>Duration</th>
+                      <th>Views</th>
+                      <th>Likes</th>
+                      <th>Eng%</th>
+                      <th>Type</th>
+                      <th>Est. {cur.symbol}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(result.videos||[]).map(v=>{
+                      const t = videoTypes[v.id]||v.type;
+                      return (
+                        <tr key={v.id}>
+                          <td>
+                            <a href={v.url} target="_blank" rel="noopener">
+                              {v.thumbnail
+                                ? <img src={v.thumbnail} alt="" style={{width:56,height:36,borderRadius:4,objectFit:"cover",display:"block"}}/>
+                                : <div style={{width:56,height:36,background:"#252d3d",borderRadius:4,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>🎬</div>
+                              }
+                            </a>
+                          </td>
+                          <td style={{maxWidth:260}}>
+                            <a href={v.url} target="_blank" rel="noopener"
+                              style={{color:"#c9d1d9",textDecoration:"none",fontSize:12,display:"block",
+                                overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}
+                              title={v.title}>{v.title}</a>
+                          </td>
+                          <td style={{color:"#8b929e",fontSize:12,whiteSpace:"nowrap"}}>{fmtDate(v.published_at)}</td>
+                          <td style={{color:"#8b929e",fontSize:12,whiteSpace:"nowrap"}}>{parseDur(v.duration)}</td>
+                          <td style={{color:"#fff",fontWeight:600}}>{fmtNum(v.views)}</td>
+                          <td style={{color:"#fff"}}>{fmtNum(v.likes)}</td>
+                          <td>
+                            <span style={{color: v.engagement>5?"#10b981":v.engagement>2?"#f59e0b":"#8b929e", fontWeight:600, fontSize:12}}>
+                              {v.engagement}%
+                            </span>
+                          </td>
+                          <td>
+                            <button onClick={()=>toggleType(v.id)}
+                              className={`badge ${t==="short"?"badge-purple":"badge-blue"}`}
+                              style={{cursor:"pointer",border:"none",fontSize:11}}>
+                              {t==="short"?"Short":"Long"}
+                            </button>
+                          </td>
+                          <td style={{color:"#10b981",fontWeight:600,fontSize:12,whiteSpace:"nowrap"}}>
+                            {cur.symbol}{(revMap[v.id]||0).toLocaleString("en-US",{maximumFractionDigits:0})}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{fontSize:11,color:"#374151",marginTop:10}}>
+                * Revenue estimates are based on configurable RPM assumptions and are purely hypothetical. Actual YouTube earnings depend on ad types, audience geography, CPM auctions, monetization eligibility and many other factors. This tool uses only public YouTube Data API v3 data.
+              </p>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── ROOT APP ──────────────────────────────────────────────────────────────────
+const NAV = [
+  {id:"dashboard",   label:"Dashboard",         icon:"📊"},
+  {id:"youtube",     label:"YT Channel Analyzer",icon:"▶️"},
+  {id:"content",     label:"AI Content Studio", icon:"✍️"},
+  {id:"trends",      label:"Trend Radar",        icon:"📈"},
+  {id:"audience",    label:"Audience Insights",  icon:"👥"},
+  {id:"competitors", label:"Competitor Intel",   icon:"🔍"},
+  {id:"calendar",    label:"Content Calendar",   icon:"📅"},
+  {id:"sentiment",   label:"Sentiment Analyzer", icon:"😊"},
+  {id:"strategy",    label:"AI Strategy Agent",  icon:"⚡"},
+  {id:"settings",    label:"Settings",           icon:"⚙️"},
+];
+
+function App() {
+  const [page, setPage] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const renderPage = () => {
+    switch(page) {
+      case "dashboard":   return <Dashboard/>;
+      case "youtube":     return <YouTubeAnalyzer/>;
+      case "strategy":    return <StrategyAgent/>;
+      case "content":     return <ContentStudio/>;
+      case "sentiment":   return <SentimentAnalyzer/>;
+      case "trends":      return <TrendRadar/>;
+      case "competitors": return <CompetitorIntelligence/>;
+      case "audience":    return <AudienceInsights/>;
+      case "calendar":    return <ContentCalendar/>;
+      case "settings":    return <Settings/>;
+      default:            return <Dashboard/>;
+    }
+  };
+
+  return (
+    <div style={{display:"flex",height:"100vh",overflow:"hidden",background:"#0f1117"}}>
+      {/* Sidebar */}
+      <div style={{
+        width: sidebarOpen ? 220 : 0,
+        minWidth: sidebarOpen ? 220 : 0,
+        background:"#161b27",
+        borderRight:"1px solid #252d3d",
+        display:"flex",
+        flexDirection:"column",
+        transition:"width .25s ease, min-width .25s ease",
+        overflow:"hidden",
+        flexShrink:0,
+      }}>
+        <div style={{padding:"20px 16px 16px",borderBottom:"1px solid #252d3d",flexShrink:0}}>
+          <div className="logo-text">SocialPulse AI</div>
+          <div style={{fontSize:10,color:"#8b929e",marginTop:2}}>Social Intelligence Platform</div>
+        </div>
+
+        <nav style={{flex:1,padding:"10px 8px",overflowY:"auto"}}>
+          {NAV.map(item=>(
+            <div key={item.id} className={`sidebar-link ${page===item.id?"active":""}`} onClick={()=>setPage(item.id)}>
+              <span style={{fontSize:15,flexShrink:0}}>{item.icon}</span>
+              <span style={{whiteSpace:"nowrap"}}>{item.label}</span>
+            </div>
+          ))}
+        </nav>
+
+        <div style={{padding:"12px",borderTop:"1px solid #252d3d",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 8px",borderRadius:8,background:"#1c2333",border:"1px solid #252d3d"}}>
+            <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#10b981,#3b82f6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:"#fff",flexShrink:0}}>C</div>
+            <div>
+              <div style={{fontSize:13,fontWeight:600,color:"#e6edf3",whiteSpace:"nowrap"}}>Creator Pro</div>
+              <div style={{fontSize:11,color:"#8b929e"}}>Pro Plan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main area */}
+      <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",minWidth:0}}>
+        {/* Top bar */}
+        <div style={{background:"#161b27",borderBottom:"1px solid #252d3d",padding:"12px 20px",display:"flex",alignItems:"center",gap:12,flexShrink:0}}>
+          <button onClick={()=>setSidebarOpen(o=>!o)}
+            style={{background:"transparent",border:"none",color:"#8b929e",cursor:"pointer",padding:"4px",borderRadius:6,fontSize:18,lineHeight:1,display:"flex",alignItems:"center"}}>
+            ☰
+          </button>
+          <span style={{fontSize:14,fontWeight:600,color:"#e6edf3"}}>{(NAV.find(n=>n.id===page)||{}).icon} {(NAV.find(n=>n.id===page)||{}).label}</span>
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8}}>
+            <span className="badge badge-green" style={{fontSize:10}}>v1.0</span>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <div style={{flex:1,overflowY:"auto",padding:"24px",minWidth:0}}>
+          {renderPage()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Mount ─────────────────────────────────────────────────────────────────────
+const rootEl = document.getElementById("root");
+if (rootEl) {
+  ReactDOM.createRoot(rootEl).render(React.createElement(App));
+}
+</script>
+</body>
+</html>
